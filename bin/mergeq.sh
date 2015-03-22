@@ -36,6 +36,7 @@
 # merged in ahead of the one they are merging, the build will fail.
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 target_branch=$1
 merge_branch=${2:-"merge/$target_branch"}
 red='\033[0;31m'
@@ -45,14 +46,14 @@ cyan='\033[0;36m'
 blue='\033[0;34m'
 default='\033[0m'
 
-project_dir=".mergeq"
-hooks_dir="$project_dir/hooks"
+source $DIR/mergeq_common.sh
+
 merging_file="$project_dir/merging"
 
 function validate_parameters {
   if [ -f $merging_file ] ; then
     echo -e "${red}It looks like you're in the middle of a merge.${default}
-If so, try ${blue}mergeq --continue${default}
+If so, try ${blue}$0 --continue${default}
 If not, delete the ${blue}$merging_file${default} file and try again."
     exit 1
   fi
@@ -62,7 +63,7 @@ If not, delete the ${blue}$merging_file${default} file and try again."
 }
 
 function print_usage_and_exit {
-  echo -e "Usage: ${blue}mergeq <target-branch> [merge-branch]${default}"
+  echo -e "Usage: ${blue}$0 <target-branch> [merge-branch]${default}"
   exit 1
 }
 
@@ -80,25 +81,12 @@ function exit_if_local_mods {
   return 0
 }
 
-# example: run_hook after
-function run_hook {
-  hook_name=$1
-  hook="$hooks_dir/$hook_name"
-
-  [[ -f $hook ]] || return 0
-
-  status "Running hook: $hook_name..."
-
-  eval "$hook \"$target_branch\" \"$merge_branch\""
-  [[ $? -eq 0 ]] || exit $?
-}
-
 function merge_failed {
   echo -e "${yellow}Doh. Your merge has conflicts, but don't worry:${default}"
   echo
   echo 1. Fix your merge conflicts
   echo 2. Commit them
-  echo -e "3. Run ${blue}mergeq --continue${default}"
+  echo -e "3. Run ${blue}$0 --continue${default}"
 
   exit 1
 }
@@ -217,7 +205,7 @@ if [ "$target_branch" = "--continue" ] ; then
 ${yellow}**********************************************************${default}
 
  It doesn't look like you're in the middle of a merge.
- Try ${blue}mergeq <branch name>${default} to start one
+ Try ${blue}$0 <branch name>${default} to start one
 
 ${yellow}**********************************************************${default}"
     exit 1
