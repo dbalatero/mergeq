@@ -18,7 +18,31 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Add `.mergeq/merging` to your project's `.gitignore`
+Create the merge target `merge/staging`
+
+
+## Pausing Guard
+
+```
+function pause_guard {
+  pid=$(guard_pid)
+  if [[ "$pid" ]]; then
+    kill -USR1 $pid
+  fi
+}
+
+function guard_pid {
+  ps ax | grep "[g]uard" | awk '{print $1}'
+}
+
+function unpause_guard {
+  pid=$(guard_pid)
+  if [[ "$pid" ]]; then
+    kill -USR2 $pid
+  fi
+}
+```
 
 ## Contributing
 
